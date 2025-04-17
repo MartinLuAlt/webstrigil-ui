@@ -112,7 +112,7 @@ const WebStrigilPage = () => {
       </ul>
 
       
-      <div className="mb-4 flex flex-wrap gap-2">
+      <div className="mb-4 flex flex-wrap gap-2 text-white">
         Example inputs:
         {examples.map((example, idx) => (
           <button
@@ -139,7 +139,7 @@ const WebStrigilPage = () => {
               type="url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              className="mt-1 block w-full bg-gray-800 border p-1 border-blue rounded-md shadow-sm focus:ring-purple-300 focus:border-purple-200 sm:text-sm"
+              className="mt-1 block w-full bg-gray-800 text-white border border-gray-600 p-1 rounded-md shadow-sm focus:ring-purple-300 focus:border-purple-400 sm:text-sm"
               required
             />
           </div>
@@ -157,23 +157,23 @@ const WebStrigilPage = () => {
                 if (value > 6) value = 6;
                 setDepth(value);
               }}
-              className="mt-1 block w-full border p-1 bg-gray-800 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              className="mt-1 block w-full bg-gray-800 text-white border border-gray-600 p-1 rounded-md shadow-sm focus:ring-purple-300 focus:border-purple-400 sm:text-sm"
               min="1"
               max="6"
             />
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-200">
-            User Prompt
-          </label>
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            className="mt-1 block w-full  border p-1 rounded-md shadow-sm sm:text-sm focus:outline-0"
-            required
-          />
-        </div>
+        <label className="block text-sm font-medium text-gray-200">
+          User Prompt
+        </label>
+        <textarea
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          className="mt-1 block w-full bg-gray-800 text-white border border-gray-600 p-1 rounded-md shadow-sm sm:text-sm focus:ring-purple-300 focus:border-purple-400"
+          required
+        />
+      </div>
         <button
           type="submit"
           className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-400 mb-5 mt-2"
