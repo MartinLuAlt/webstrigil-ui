@@ -32,4 +32,4 @@ jobs:
 
       - name: Deploy to S3 (no ACLs)
         run: |
-          aws s3 sync out/ s3://$AWS_S3_BUCKET --delete --exact-timestamps
+          aws s3 sync out/ s3://$S3_BUCKET_NAME --delete --exact-timestamps
