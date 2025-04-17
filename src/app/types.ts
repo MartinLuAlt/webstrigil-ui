@@ -1,3 +1,4 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 export interface CrawlResponse {
     success: boolean;
     message: string;
@@ -37,4 +38,8 @@ export interface CrawlResponse {
     message: string;
     details: Record<string, any>;
   }
-  
+ 
+  export type UiError =
+  | { kind: 'network'; message: string }
+  | { kind: 'api'; message: string; errors?: CrawlError[] }
+  | { kind: 'unknown'; message: string };
