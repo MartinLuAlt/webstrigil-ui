@@ -23,6 +23,9 @@ jobs:
       - name: Build Next.js app
         run: npm run build
 
+      - name: Test S3_BUCKET_NAME
+        run: echo $S3_BUCKET_NAME
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
