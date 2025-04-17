@@ -1,103 +1,165 @@
-import Image from "next/image";
+"use client";
+import React, { useState } from 'react';
+import axios from 'axios';
+import HistoryEntry from './components/HistoryEntry';
 
-export default function Home() {
+const examples = [{
+  "start_url": "https://admissions.berkeley.edu/",
+  "user_instruction": "What are the application deadlines for UC Berkeley?",
+  "max_depth": 1,
+  "example_name": "UC Berkeley admission date",
+}, {
+  "start_url": "https://www.usgs.gov/centers/national-minerals-information-center",
+  "user_instruction": "What is the current cost of copper?",
+  "max_depth": 1,
+  "example_name": "USGS copper cost",
+}, {
+  "start_url": "https://tradingeconomics.com/",
+  "user_instruction": "What is the current cost of rubber?",
+  "max_depth": 2,
+  "example_name": "Rubber commodity cost",
+}]
+
+const WebStrigilPage = () => {
+  const [url, setUrl] = useState(examples[0].start_url);
+  const [prompt, setPrompt] = useState(examples[0].user_instruction);
+  const [depth, setDepth] = useState(examples[0].max_depth);
+  const [results, setResults] = useState<any>(null);
+
+  const BACKEND_URL = "http://strigil-public-load-balancer-1010299699.us-east-2.elb.amazonaws.com";
+  const [isLoading, setIsLoading] = useState(false);
+
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      console.log("Making call")
+      const response = await axios.post(`${BACKEND_URL}/crawl`, {
+        start_url: url,
+        user_instruction: prompt,
+        max_depth: depth,
+      });
+      console.log('Crawl Results:', response.data);
+      setResults(response.data); // store in state if needed
+    } catch (error) {
+      console.error('Error running crawl:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="container mx-auto p-4 bg-gray-900 min-h-screen">
+      <h1 className="text-2xl font-bold mb-4">WebStrigil Crawler</h1>
+      <div className="mb-4 flex flex-wrap gap-2">
+        Example inputs: 
+        {examples.map((example, idx) => (
+          <button
+            key={idx}
+            type="button"
+            onClick={() => {
+              setUrl(example.start_url);
+              setPrompt(example.user_instruction);
+              setDepth(example.max_depth);
+            }}
+            className="bg-gray-700 hover:bg-gray-600 text-sm text-white px-3 py-1 rounded shadow-sm border border-gray-500 border-r-2"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+            {example.example_name}
+          </button>
+        ))}
+      </div>
+      <form onSubmit={handleSubmit} className="space-y-2">
+        <div className="flex space-x-4">
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-200">
+              Starting URL
+              {/* <span className="ml-1 cursor-pointer" title="Enter the URL to start crawling.">?</span> */}
+            </label>
+            <input
+              type="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              className="mt-1 block w-full bg-gray-800 border p-1 border-blue rounded-md shadow-sm focus:ring-purple-300 focus:border-purple-200 sm:text-sm"
+              required
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          </div>
+          <div className="w-1/5">
+            <label className="block text-sm font-medium text-gray-200">
+              Crawl Depth
+              {/* <span className="ml-1 cursor-pointer" title="Set the maximum depth for crawling.">?</span> */}
+            </label>
+            <input
+              type="number"
+              value={depth}
+              onChange={(e) => setDepth(e.target.value)}
+              onBlur={(e) => {
+                let value = Number(e.target.value)
+                if(value < 0) value = 0;
+                if(value > 6) value = 6;
+                setDepth(value)
+              }}
+              className="mt-1 block w-full border p-1 bg-gray-800 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              min="1"
+              max="6"
+            />
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+        <div>
+          <label className="block text-sm font-medium text-gray-200">
+            User Prompt
+            {/* <span className="ml-1 cursor-pointer" title="Provide instructions for the AI agent.">?</span> */}
+          </label>
+          <textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            className="mt-1 block w-full  border p-1 rounded-md shadow-sm sm:text-sm focus:outline-0"
+            required
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+        </div>
+        <button
+          type="submit"
+          className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-400"
         >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+          Run Crawl
+        </button>
+      </form>
+      {isLoading}
+      
+      <div className="mt-8">
+        <h2 className="text-xl font-bold mb-3 text-white">Results</h2>
+
+        <div className="bg-gray-500 p-1.5 rounded-md">
+          {isLoading ? (
+            <p>Loading...</p>
+          ) : results ? (
+            <>
+              {results.history?.map((entry: any, index: number) => (
+                <HistoryEntry key={index} entry={entry} />
+              ))}
+            </>
+          ) : (
+            <p>No results yet.</p>
+          )}
+        </div>
+
+        <button
+          className="mt-4 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400"
+          disabled={!results}
+          onClick={() => {
+            const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'crawl_results.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }}
         >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          Download JSON
+        </button>
+      </div>
     </div>
   );
-}
+};
+
+export default WebStrigilPage;
